@@ -5,17 +5,19 @@ public class NotGate extends Gate {
 
 
     public NotGate() {
-        super("NOT", 1);
+        super("NotGate", 1);
 
         nand = new NandGate();
     }
 
 
     @Override
-    public boolean read() {
-        return nand.read();
+    public boolean read(int outputPin) {
+    if (outputPin != 0) {
+      throw new IndexOutOfBoundsException(outputPin);
     }
-
+    return nand.read();
+    }
 
     @Override
     public void connect(int inputPin, SignalEmitter emitter) {

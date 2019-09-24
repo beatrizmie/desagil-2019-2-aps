@@ -7,7 +7,12 @@ public class MockEmitter implements SignalEmitter {
         this.signal = signal;
     }
 
-    @Override
+  @Override
+  public boolean read(int outputPin) {
+    return false;
+  }
+
+  @Override
     public boolean read() {
         return signal;
     }

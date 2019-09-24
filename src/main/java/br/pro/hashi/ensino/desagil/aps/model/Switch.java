@@ -16,7 +16,10 @@ public class Switch implements SignalEmitter {
     }
 
     @Override
-    public boolean read() {
-        return signal;
+    public boolean read(int outputPin) {
+      if (outputPin != 0) {
+        throw new IndexOutOfBoundsException(outputPin);
     }
+    return signal;
+  }
 }

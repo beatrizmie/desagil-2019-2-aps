@@ -4,12 +4,15 @@ public class NandGate extends Gate {
     private final SignalEmitter[] emitters;
 
     public NandGate() {
-        super("NAND", 2);
+        super("NandGate", 2);
         emitters = new SignalEmitter[2];
     }
 
     @Override
-    public boolean read() {
+    public boolean read(int outputPin) {
+        if (outputPin!=0){
+          throw new IndexOutOfBoundsException(outputPin);
+        }
         boolean a = (emitters[0] != null && emitters[0].read());
         boolean b = (emitters[1] != null && emitters[1].read());
         return !(a && b);

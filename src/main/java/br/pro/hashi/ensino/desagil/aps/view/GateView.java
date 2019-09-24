@@ -8,19 +8,25 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
 
-public class GateView extends FixedPanel implements ActionListener, MouseListener {
+public class GateView extends FixedPanel implements ItemListener, MouseListener {
+
+    private static final int BORDER = 60;
+    private static final int SWITCH_SIZE = 25;
+    private static final int LIGHT_SIZE = 12;
+    private static final int GATE_WIDTH = 90;
+    private static final int GATE_HEIGHT = 200;
+
     private final Switch[] switches;
     private final Gate gate;
 
     private final JCheckBox[] inputBoxes;
-    private final JCheckBox outputBox;
 
     private final Image image;
     private Color color;
 
     public GateView(Gate gate) {
 
-        super(245, 346);
+        super(345, 246);
 
         this.gate = gate;
 
@@ -36,19 +42,17 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
             gate.connect(i, switches[i]);
         }
 
-        outputBox = new JCheckBox();
 
-        JLabel inputLabel = new JLabel("Input");
-        JLabel outputLabel = new JLabel("Output");
+        int x, y, step;
 
-//        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        x = BORDER;
+        y = -(SWITCH_SIZE - 40 / 2);
+        step = (GATE_HEIGHT / (inputSize + 1));
 
-        add(inputLabel, 10, 10, 75, 25);
         for (JCheckBox inputBox : inputBoxes) {
-            add(inputBox, 10, inputBox.getY()*20, 75, 25);
+          y += step;
+          add(inputBox, x, y, SWITCH_SIZE - 10, SWITCH_SIZE - 10);
         }
-        add(outputLabel, 10, 311, 75, 25);
-        add(outputBox, 85, 311, 120, 25);
 
         color = Color.BLACK;
 
@@ -56,85 +60,27 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
         URL url = getClass().getClassLoader().getResource(name);
         image = getToolkit().getImage(url);
 
-        addMouseListener(this);
 
         for (JCheckBox inputBox : inputBoxes) {
-            inputBox.addActionListener(this);
+            inputBox.addItemListener(this);
         }
 
-        outputBox.setEnabled(false);
-
         update();
+
+        this.addMouseListener(this);
     }
 
     private void update() {
-        for (int i = 0; i < gate.getInputSize(); i++) {
-            if (inputBoxes[i].isSelected()) {
-                switches[i].turnOn();
-            } else {
-                switches[i].turnOff();
-            }
+      for (int i = 0; i < gate.getInputSize(); i++) {
+        if (inputBoxes[i].isSelected()) {
+          switches[i].turnOn();
+        } else {
+          switches[i].turnOff();
         }
-
-        boolean result = gate.read();
-
-        if (result == false){
-
-        }
-
-        outputBox.setSelected(result);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent event) {
-      update();
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent event) {
-
-      // Descobre em qual posição o clique ocorreu.
-      int x = event.getX();
-      int y = event.getY();
-
-      // Se o clique foi dentro do quadrado colorido...
-      if (x >= 210 && x < 235 && y >= 311 && y < 336) {
-
-        // ...então abrimos a janela seletora de cor...
-        color = JColorChooser.showDialog(this, null, color);
-
-        // ...e chamamos repaint para atualizar a tela.
-        repaint();
       }
+      repaint();
     }
 
-    @Override
-    public void mousePressed(MouseEvent event) {
-      // Não precisamos de uma reação específica à ação de pressionar
-      // um botão do mouse, mas o contrato com MouseListener obriga
-      // esse método a existir, então simplesmente deixamos vazio.
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent event) {
-      // Não precisamos de uma reação específica à ação de soltar
-      // um botão do mouse, mas o contrato com MouseListener obriga
-      // esse método a existir, então simplesmente deixamos vazio.
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent event) {
-      // Não precisamos de uma reação específica à ação do mouse
-      // entrar no painel, mas o contrato com MouseListener obriga
-      // esse método a existir, então simplesmente deixamos vazio.
-    }
-
-    @Override
-    public void mouseExited(MouseEvent event) {
-      // Não precisamos de uma reação específica à ação do mouse
-      // sair do painel, mas o contrato com MouseListener obriga
-      // esse método a existir, então simplesmente deixamos vazio.
-    }
 
     @Override
     public void paintComponent(Graphics g) {
@@ -145,15 +91,60 @@ public class GateView extends FixedPanel implements ActionListener, MouseListene
       // componentes internas, e isso é feito pela superclasse.
       super.paintComponent(g);
 
-      // Desenha a imagem, passando sua posição e seu tamanho.
-      g.drawImage(image, 10, 80, 221, 221, this);
+      if (gate.getOutputSize() == 1){
+        if (gate.read()) {
+          g.setColor(color.RED);
+        }else{
+          g.setColor(color);
+        }
+        g.drawImage(image, 80, 30, 150, 150, this);
+        g.fillOval(230, 100, 15, 15);
+      }
+        // Linha necessária para evitar atrasos
+        // de renderização em sistemas Linux.
+        getToolkit().sync();
+      }
 
-      // Desenha um quadrado cheio.
-      g.setColor(color);
-      g.fillRect(210, 311, 25, 25);
 
-      // Linha necessária para evitar atrasos
-      // de renderização em sistemas Linux.
-      getToolkit().sync();
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    int x = BORDER + SWITCH_SIZE + GATE_WIDTH + LIGHT_SIZE / 2;
+    int y = GATE_HEIGHT / 2;
+
+    if (gate.getOutputSize() == 1) {
+      if (Math.sqrt(Math.pow(x - e.getX(), 2) + Math.pow(y - e.getY(), 2)) < LIGHT_SIZE / 2) {
+        Color color = JColorChooser.showDialog(this, null, this.color);
+        if (color != null) {
+          this.color = color;
+        }
+        repaint();
+      }
     }
+  }
+
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent e) {
+
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e) {
+
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e) {
+
+  }
+
+  @Override
+  public void itemStateChanged(ItemEvent e) {
+
+  }
 }
