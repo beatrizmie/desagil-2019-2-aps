@@ -1,6 +1,7 @@
 package br.pro.hashi.ensino.desagil.aps.view;
 
 import br.pro.hashi.ensino.desagil.aps.model.Gate;
+import br.pro.hashi.ensino.desagil.aps.model.Light;
 import br.pro.hashi.ensino.desagil.aps.model.Switch;
 
 import javax.swing.*;
@@ -12,21 +13,19 @@ public class GateView extends FixedPanel implements ItemListener, MouseListener 
 
     private static final int BORDER = 60;
     private static final int SWITCH_SIZE = 25;
-    private static final int LIGHT_SIZE = 12;
-    private static final int GATE_WIDTH = 90;
-    private static final int GATE_HEIGHT = 200;
+    private static final int LIGHT_SIZE = 18;
+    private static final int GATE_WIDTH = 120;
+    private static final int GATE_HEIGHT = 160;
 
     private final Switch[] switches;
     private final Gate gate;
-
+    private final Light light;
     private final JCheckBox[] inputBoxes;
-
     private final Image image;
-    private Color color;
 
     public GateView(Gate gate) {
 
-        super(345, 246);
+        super(300, 200);
 
         this.gate = gate;
 
@@ -42,32 +41,35 @@ public class GateView extends FixedPanel implements ItemListener, MouseListener 
             gate.connect(i, switches[i]);
         }
 
+        light = new Light();
+        light.setR(255);
+        light.setG(0);
+        light.setB(0);
+        light.connect(0, gate);
 
         int x, y, step;
 
-        x = BORDER;
-        y = -(SWITCH_SIZE - 40 / 2);
+        x = BORDER + 8;
+        y = -((SWITCH_SIZE ) / 2);
         step = (GATE_HEIGHT / (inputSize + 1));
 
         for (JCheckBox inputBox : inputBoxes) {
           y += step;
           add(inputBox, x, y, SWITCH_SIZE - 10, SWITCH_SIZE - 10);
+          y += 15;
         }
-
-        color = Color.BLACK;
 
         String name = gate.toString() + ".png";
         URL url = getClass().getClassLoader().getResource(name);
         image = getToolkit().getImage(url);
 
+        addMouseListener(this);
 
         for (JCheckBox inputBox : inputBoxes) {
             inputBox.addItemListener(this);
         }
 
         update();
-
-        this.addMouseListener(this);
     }
 
     private void update() {
@@ -91,15 +93,12 @@ public class GateView extends FixedPanel implements ItemListener, MouseListener 
       // componentes internas, e isso é feito pela superclasse.
       super.paintComponent(g);
 
-      if (gate.getOutputSize() == 1){
-        if (gate.read()) {
-          g.setColor(color.RED);
-        }else{
-          g.setColor(color);
-        }
-        g.drawImage(image, 80, 30, 150, 150, this);
-        g.fillOval(230, 100, 15, 15);
-      }
+      g.drawImage(image, BORDER + SWITCH_SIZE, 0, GATE_WIDTH + 30, GATE_HEIGHT, this);
+
+      g.setColor(new Color(light.getR(), light.getG(), light.getB()));
+
+      g.fillOval(BORDER + SWITCH_SIZE + GATE_WIDTH + 28, (GATE_HEIGHT - LIGHT_SIZE) / 2, LIGHT_SIZE + 2, 2 + LIGHT_SIZE);
+
         // Linha necessária para evitar atrasos
         // de renderização em sistemas Linux.
         getToolkit().sync();
@@ -108,18 +107,23 @@ public class GateView extends FixedPanel implements ItemListener, MouseListener 
 
   @Override
   public void mouseClicked(MouseEvent e) {
-    int x = BORDER + SWITCH_SIZE + GATE_WIDTH + LIGHT_SIZE / 2;
+
+    int r = LIGHT_SIZE / 2;
+    int x = BORDER + SWITCH_SIZE + GATE_WIDTH + r;
     int y = GATE_HEIGHT / 2;
 
-    if (gate.getOutputSize() == 1) {
-      if (Math.sqrt(Math.pow(x - e.getX(), 2) + Math.pow(y - e.getY(), 2)) < LIGHT_SIZE / 2) {
-        Color color = JColorChooser.showDialog(this, null, this.color);
-        if (color != null) {
-          this.color = color;
-        }
-        repaint();
+    if (Math.pow(x - e.getX(), 2) + Math.pow(y - e.getY(), 2) < Math.pow(r, 2)) {
+      Color oldColor = new Color(light.getR(), light.getG(), light.getB());
+      Color newColor = JColorChooser.showDialog(this, null, oldColor);
+
+      if (newColor != null) {
+        light.setR(newColor.getRed());
+        light.setG(newColor.getGreen());
+        light.setB(newColor.getBlue());
       }
     }
+    repaint();
+    update();
   }
 
 
@@ -145,6 +149,6 @@ public class GateView extends FixedPanel implements ItemListener, MouseListener 
 
   @Override
   public void itemStateChanged(ItemEvent e) {
-
+    update();
   }
 }
