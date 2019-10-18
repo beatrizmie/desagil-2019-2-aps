@@ -8,37 +8,37 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 public class View extends JPanel implements ActionListener {
-    private final JComboBox<Gate> menu;
-    private GateView gateView;
+  private final JComboBox<Gate> menu;
+  private GateView gateView;
 
-    public View(LinkedList<Gate> model) {
-        menu = new JComboBox<>();
-        for (Gate gate : model) {
-            menu.addItem(gate);
-        }
-
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        add(menu);
-        addGateView(0);
-
-        menu.addActionListener(this);
+  public View(LinkedList<Gate> model) {
+    menu = new JComboBox<>();
+    for (Gate gate : model) {
+      menu.addItem(gate);
     }
 
-    private void addGateView(int index) {
-        Gate gate = menu.getItemAt(index);
-        gateView = new GateView(gate);
-        add(gateView);
-    }
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-    @Override
-    public void actionPerformed(ActionEvent event) {
-        remove(gateView);
-        int index = menu.getSelectedIndex();
-        addGateView(index);
+    add(menu);
+    addGateView(0);
 
-        // Mantenha esta linha, mas não precisa entendê-la.
-        // É necessária para evitar bugs em alguns sistemas.
-        ((JFrame) SwingUtilities.getRoot(this)).pack();
-    }
+    menu.addActionListener(this);
+  }
+
+  private void addGateView(int index) {
+    Gate gate = menu.getItemAt(index);
+    gateView = new GateView(gate);
+    add(gateView);
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    remove(gateView);
+    int index = menu.getSelectedIndex();
+    addGateView(index);
+
+    // Mantenha esta linha, mas não precisa entendê-la.
+    // É necessária para evitar bugs em alguns sistemas.
+    ((JFrame) SwingUtilities.getRoot(this)).pack();
+  }
 }

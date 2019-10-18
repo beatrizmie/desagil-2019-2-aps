@@ -12,86 +12,86 @@ import java.awt.event.ItemListener;
 import java.net.URL;
 
 public class GateView extends FixedPanel implements ItemListener {
-    private static final int BORDER = 10;
-    private static final int SWITCH_SIZE = 18;
-    private static final int GATE_WIDTH = 90;
-    private static final int GATE_HEIGHT = 60;
+  private static final int BORDER = 10;
+  private static final int SWITCH_SIZE = 18;
+  private static final int GATE_WIDTH = 90;
+  private static final int GATE_HEIGHT = 60;
 
-    private final Switch[] switches;
-    private final Gate gate;
-    private final JCheckBox[] inputBoxes;
-    private final JCheckBox outputBox;
-    private final Image image;
+  private final Switch[] switches;
+  private final Gate gate;
+  private final JCheckBox[] inputBoxes;
+  private final JCheckBox outputBox;
+  private final Image image;
 
-    public GateView(Gate gate) {
-        super(BORDER + SWITCH_SIZE + GATE_WIDTH + SWITCH_SIZE + BORDER, GATE_HEIGHT);
+  public GateView(Gate gate) {
+    super(BORDER + SWITCH_SIZE + GATE_WIDTH + SWITCH_SIZE + BORDER, GATE_HEIGHT);
 
-        this.gate = gate;
+    this.gate = gate;
 
-        int inputSize = gate.getInputSize();
+    int inputSize = gate.getInputSize();
 
-        switches = new Switch[inputSize];
-        inputBoxes = new JCheckBox[inputSize];
+    switches = new Switch[inputSize];
+    inputBoxes = new JCheckBox[inputSize];
 
-        for (int i = 0; i < inputSize; i++) {
-            switches[i] = new Switch();
-            inputBoxes[i] = new JCheckBox();
+    for (int i = 0; i < inputSize; i++) {
+      switches[i] = new Switch();
+      inputBoxes[i] = new JCheckBox();
 
-            gate.connect(i, switches[i]);
-        }
-
-        outputBox = new JCheckBox();
-
-        int x, y, step;
-
-        x = BORDER;
-        y = -(SWITCH_SIZE / 2);
-        step = (GATE_HEIGHT / (inputSize + 1));
-        for (JCheckBox inputBox : inputBoxes) {
-            y += step;
-            add(inputBox, x, y, SWITCH_SIZE, SWITCH_SIZE);
-        }
-
-        add(outputBox, BORDER + SWITCH_SIZE + GATE_WIDTH, (GATE_HEIGHT - SWITCH_SIZE) / 2, SWITCH_SIZE, SWITCH_SIZE);
-
-        String name = gate.toString() + ".png";
-        URL url = getClass().getClassLoader().getResource(name);
-        image = getToolkit().getImage(url);
-
-        for (JCheckBox inputBox : inputBoxes) {
-            inputBox.addItemListener(this);
-        }
-
-        outputBox.setEnabled(false);
-
-        update();
+      gate.connect(i, switches[i]);
     }
 
-    private void update() {
-        for (int i = 0; i < gate.getInputSize(); i++) {
-            if (inputBoxes[i].isSelected()) {
-                switches[i].turnOn();
-            } else {
-                switches[i].turnOff();
-            }
-        }
+    outputBox = new JCheckBox();
 
-        boolean result = gate.read();
+    int x, y, step;
 
-        outputBox.setSelected(result);
+    x = BORDER;
+    y = -(SWITCH_SIZE / 2);
+    step = (GATE_HEIGHT / (inputSize + 1));
+    for (JCheckBox inputBox : inputBoxes) {
+      y += step;
+      add(inputBox, x, y, SWITCH_SIZE, SWITCH_SIZE);
     }
 
-    @Override
-    public void itemStateChanged(ItemEvent event) {
-        update();
+    add(outputBox, BORDER + SWITCH_SIZE + GATE_WIDTH, (GATE_HEIGHT - SWITCH_SIZE) / 2, SWITCH_SIZE, SWITCH_SIZE);
+
+    String name = gate.toString() + ".png";
+    URL url = getClass().getClassLoader().getResource(name);
+    image = getToolkit().getImage(url);
+
+    for (JCheckBox inputBox : inputBoxes) {
+      inputBox.addItemListener(this);
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    outputBox.setEnabled(false);
 
-        g.drawImage(image, BORDER + SWITCH_SIZE, 0, GATE_WIDTH, GATE_HEIGHT, this);
+    update();
+  }
 
-        getToolkit().sync();
+  private void update() {
+    for (int i = 0; i < gate.getInputSize(); i++) {
+      if (inputBoxes[i].isSelected()) {
+        switches[i].turnOn();
+      } else {
+        switches[i].turnOff();
+      }
     }
+
+    boolean result = gate.read();
+
+    outputBox.setSelected(result);
+  }
+
+  @Override
+  public void itemStateChanged(ItemEvent event) {
+    update();
+  }
+
+  @Override
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+
+    g.drawImage(image, BORDER + SWITCH_SIZE, 0, GATE_WIDTH, GATE_HEIGHT, this);
+
+    getToolkit().sync();
+  }
 }
